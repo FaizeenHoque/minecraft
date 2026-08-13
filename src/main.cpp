@@ -47,7 +47,9 @@ int main()
 
     gladLoadGL();
 
-    glViewport(0, 0, 800, 800);
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
 
     Shader shaderProgram(
         "src/shaders/default.vert",
