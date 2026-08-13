@@ -25,11 +25,12 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
     GLfloat vertices[] = {
-        -0.5f, -sqrt(3.0f) / 6.0f, 0.0f,
-        0.5f, -sqrt(3.0f) / 6.0f, 0.0f,
-        0.0f, sqrt(3.0f) / 3.0f, 0.0f};
+        -0.5f, -sqrt(3.0f) / 6.0f - sqrt(3.0f) / 12.0f, 0.0f,
+        0.5f, -sqrt(3.0f) / 6.0f - sqrt(3.0f) / 12.0f, 0.0f,
+        0.0f, sqrt(3.0f) / 3.0f - sqrt(3.0f) / 12.0f, 0.0f};
 
     GLFWwindow *window = glfwCreateWindow(800, 800, "minecraft", NULL, NULL);
     if (window == NULL)
@@ -42,7 +43,9 @@ int main()
 
     gladLoadGL();
 
-    glViewport(0, 0, 800, 800);
+    int fbWidth, fbHeight;
+    glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+    glViewport(0, 0, fbWidth, fbHeight);
 
     GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);

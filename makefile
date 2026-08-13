@@ -1,5 +1,5 @@
 dev:
-	g++ main.cpp glad/src/glad.c -Iglad/include -lglfw -lGL -o build/app
+	g++ src/main.cpp libraries/glad/src/glad.c -Ilibraries/glad/include -lglfw -lGL -o build/app
 run:
-	g++ main.cpp glad/src/glad.c -Iglad/include -lglfw -lGL -o build/app
+	g++ src/main.cpp libraries/glad/src/glad.c -Ilibraries/glad/include -lglfw -lGL -o build/app
 	./build/app
