@@ -13,7 +13,7 @@
 #include "stb_image.h"
 #include "camera.h"
 
-const unsigned int width = 800;
+const unsigned int width = 1600;
 const unsigned int height = 800;
 
 GLfloat vertices[] =
@@ -66,11 +66,19 @@ int main()
     }
     glfwMakeContextCurrent(window);
 
+    glfwSetWindowSizeLimits(window, width, height, width, height);
+    glfwSetWindowSize(window, width, height);
+
+    int actualWindowWidth;
+    int actualWindowHeight;
+    glfwGetWindowSize(window, &actualWindowWidth, &actualWindowHeight);
+    std::cout << "Window client size: " << actualWindowWidth << "x" << actualWindowHeight << std::endl;
+
     gladLoadGL();
 
-    // int width, height;
-    // glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
+    int framebufferWidth, framebufferHeight;
+    glfwGetFramebufferSize(window, &framebufferWidth, &framebufferHeight);
+    glViewport(0, 0, framebufferWidth, framebufferHeight);
 
     Shader shaderProgram(
         "src/shaders/default.vert",
@@ -95,7 +103,7 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    Camera camera(width, height, glm::vec3(0.0f, 0.0f, 3.0f));
+    Camera camera(framebufferWidth, framebufferHeight, glm::vec3(0.0f, 0.0f, 3.0f));
 
     while (!glfwWindowShouldClose(window))
     {
