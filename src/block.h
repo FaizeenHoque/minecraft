@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include "texture.h"
+#include "shaders.h"
 
 enum class BlockType
 {
@@ -26,6 +27,7 @@ struct Block
 {
     BlockType type;
     BlockTexture textures;
+    glm::ivec3 position;
 };
 
 #endif

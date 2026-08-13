@@ -2,14 +2,16 @@
 #define WORLD_CLASS_H
 
 #include "block.h"
-#include "perlin_noise.hpp"
-#include <glm/glm.hpp>
+#include <vector>
+#include <unordered_set>
 
 class World
 {
 public:
     std::vector<Block> blocks;
+
     void generate();
+    bool isAir(int x, int y, int z) const;
 };
 
 #endif

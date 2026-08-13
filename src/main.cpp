@@ -7,6 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "perlin_noise.hpp"
 
+#include "block.h"
 #include "texture.h"
 #include "shaders.h"
 #include "vao.h"
@@ -182,7 +183,6 @@ int main()
     Block BedrockBlock = {BlockType::Bedrock, BedrockBlock_Textures};
 
     glEnable(GL_DEPTH_TEST);
-
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
@@ -194,6 +194,25 @@ int main()
 
     World world;
     world.generate();
+
+    for (Block &block : world.blocks)
+    {
+        switch (block.type)
+        {
+        case BlockType::Grass:
+            block.textures = GrassBlock_Textures;
+            break;
+        case BlockType::Dirt:
+            block.textures = DirtBlock_Textures;
+            break;
+        case BlockType::Stone:
+            block.textures = StoneBlock_Textures;
+            break;
+        case BlockType::Bedrock:
+            block.textures = BedrockBlock_Textures;
+            break;
+        }
+    }
 
     while (!glfwWindowShouldClose(window))
     {
@@ -217,61 +236,61 @@ int main()
 
         VAO1.Bind();
 
-        for (int x = 0; x < 10; x++)
+        for (const Block &block : world.blocks)
         {
-            for (int z = 0; z < 10; z++)
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(block.position.x, block.position.y, block.position.z));
+
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+
+            // Front (+Z)
+            if (world.isAir(block.position.x, block.position.y, block.position.z + 1))
             {
-                for (int y = 0; y < 60; y++)
-                {
-                    Block *currentBlock;
+                block.textures.front->Bind();
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
+            }
 
-                    if (y == 59)
-                        currentBlock = &GrassBlock;
-                    else if (y >= 30)
-                        currentBlock = &DirtBlock;
-                    else if (y >= 3)
-                        currentBlock = &StoneBlock;
-                    else
-                        currentBlock = &BedrockBlock;
+            // Back (-Z)
+            if (world.isAir(block.position.x, block.position.y, block.position.z - 1))
+            {
+                block.textures.back->Bind();
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(6 * sizeof(GLuint)));
+            }
 
-                    glm::mat4 model = glm::mat4(1.0f);
-                    model = glm::translate(model, glm::vec3((float)x, (float)y, (float)z));
+            // Right (+X)
+            if (world.isAir(block.position.x + 1, block.position.y, block.position.z))
+            {
+                block.textures.right->Bind();
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(12 * sizeof(GLuint)));
+            }
 
-                    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            // Left (-X)
+            if (world.isAir(block.position.x - 1, block.position.y, block.position.z))
+            {
+                block.textures.left->Bind();
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(18 * sizeof(GLuint)));
+            }
 
-                    // Front
-                    currentBlock->textures.front->Bind();
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
+            // Top (+Y)
+            if (world.isAir(block.position.x, block.position.y + 1, block.position.z))
+            {
+                block.textures.top->Bind();
 
-                    // Back
-                    currentBlock->textures.back->Bind();
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(6 * sizeof(GLuint)));
-
-                    // Right
-                    currentBlock->textures.right->Bind();
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(12 * sizeof(GLuint)));
-
-                    // Left
-                    currentBlock->textures.left->Bind();
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(18 * sizeof(GLuint)));
-
-                    // Top
-                    currentBlock->textures.top->Bind();
-
-                    if (currentBlock->type == BlockType::Grass)
-                        glUniform3f(tintLoc, 0.7f, 1.0f, 0.6f);
-                    else
-                        glUniform3f(tintLoc, 1.0f, 1.0f, 1.0f);
-
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(24 * sizeof(GLuint)));
-
-                    // Reset tint
+                if (block.type == BlockType::Grass)
+                    glUniform3f(tintLoc, 0.7f, 1.0f, 0.6f);
+                else
                     glUniform3f(tintLoc, 1.0f, 1.0f, 1.0f);
 
-                    // Bottom
-                    currentBlock->textures.bottom->Bind();
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(30 * sizeof(GLuint)));
-                }
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(24 * sizeof(GLuint)));
+
+                glUniform3f(tintLoc, 1.0f, 1.0f, 1.0f);
+            }
+
+            // Bottom (-Y)
+            if (world.isAir(block.position.x, block.position.y - 1, block.position.z))
+            {
+                block.textures.bottom->Bind();
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(30 * sizeof(GLuint)));
             }
         }
 

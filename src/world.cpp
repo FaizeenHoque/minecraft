@@ -2,21 +2,34 @@
 
 void World::generate()
 {
-    // const siv::PerlinNoise::seed_type seed = 123456u;
-    // const siv::PerlinNoise perlin{seed};
+    for (int x = 0; x < 10; x++)
+    {
+        for (int z = 0; z < 10; z++)
+        {
+            for (int y = 0; y < 60; y++)
+            {
+                Block block;
 
-    // for (int x = 0; x < 32; x++)
-    // {
-    //     for (int z = 0; z < 32; z++)
-    //     {
-    //         double noise = perlin.octave2D_01(x * 0.01, z * 0.01, 4);
-    //         int height = static_cast<int>(noise * 20);
+                if (y == 59)
+                    block.type = BlockType::Grass;
+                else if (y >= 54)
+                    block.type = BlockType::Dirt;
+                else if (y >= 3)
+                    block.type = BlockType::Stone;
+                else
+                    block.type = BlockType::Bedrock;
 
-    //         for (int y = 0; y <= height; y++)
-    //         {
-    //             BlockType type = (y < height - 3) ? BlockType::Stone : BlockType::Dirt;
-    //             blocks.push_back({glm::vec3(x, y, z), type});
-    //         }
-    //     }
-    // }
+                block.position = glm::ivec3(x, y, z);
+
+                blocks.push_back(block);
+            }
+        }
+    }
+}
+
+bool World::isAir(int x, int y, int z) const
+{
+    return x < 0 || x >= 10 ||
+           y < 0 || y >= 60 ||
+           z < 0 || z >= 10;
 }
