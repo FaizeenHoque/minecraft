@@ -38,7 +38,7 @@ void Camera::Inputs(GLFWwindow *window)
     const float now = static_cast<float>(glfwGetTime());
     const float deltaTime = lastFrameTime == 0.0f ? 0.0f : now - lastFrameTime;
     lastFrameTime = now;
-    const float moveSpeed = (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    const float moveSpeed = (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
                                 ? sprintSpeed
                                 : walkSpeed;
     const float distance = moveSpeed * deltaTime;
@@ -67,7 +67,7 @@ void Camera::Inputs(GLFWwindow *window)
     {
         Position += distance * Up;
     }
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
     {
         Position -= distance * Up;
     }

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <cmath>
@@ -118,6 +119,8 @@ int main()
         "src/shaders/default.vert",
         "src/shaders/default.frag");
 
+    GLuint modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
+
     VAO VAO1;
     VAO1.Bind();
 
@@ -149,8 +152,42 @@ int main()
         camera.Matrix(45.0f, 0.01f, 100.0f, shaderProgram, "camMatrix");
 
         dirt.Bind();
+
         VAO1.Bind();
-        glDrawElements(GL_TRIANGLES, sizeof(indices) / sizeof(int), GL_UNSIGNED_INT, 0);
+
+        std::vector<glm::vec3> cubePositions;
+
+        for (int x = 0; x < 16; x++)
+        {
+            for (int z = 0; z < 16; z++)
+            {
+                for (int y = 0; y < 384; y++)
+                {
+                    glm::vec3 newPos = glm::vec3((float)x, (float)y, (float)z);
+                    cubePositions.push_back(newPos);
+                }
+            }
+        }
+
+        for (auto &position : cubePositions)
+        {
+            glm::mat4 model = glm::mat4(1.0f);
+
+            model = glm::translate(model, position);
+
+            glUniformMatrix4fv(
+                modelLoc,
+                1,
+                GL_FALSE,
+                glm::value_ptr(model));
+
+            glDrawElements(
+                GL_TRIANGLES,
+                sizeof(indices) / sizeof(indices[0]),
+                GL_UNSIGNED_INT,
+                0);
+        }
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
