@@ -1,5 +1,14 @@
-dev:
-	g++ src/main.cpp libraries/glad/src/glad.c -Ilibraries/glad/include -lglfw -lGL -o build/app
-run:
-	g++ src/main.cpp libraries/glad/src/glad.c -Ilibraries/glad/include -lglfw -lGL -o build/app
+CXX = g++
+CXXFLAGS = -Ilibraries/glad/include
+LDFLAGS = -lglfw -lGL
+
+SRC = $(wildcard src/*.cpp) libraries/glad/src/glad.c
+
+build/app: $(SRC)
+	$(CXX) $(SRC) $(CXXFLAGS) $(LDFLAGS) -o $@
+
+run: build/app
 	./build/app
+
+clean:
+	rm -f build/app
