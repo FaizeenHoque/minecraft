@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <cmath>
 
+#include "texture.h"
 #include "shaders.h"
 #include "vao.h"
 #include "vbo.h"
@@ -69,37 +70,8 @@ int main()
 
     GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
 
-    // Texture
-    int widthImg, heightImg, numColCh;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char *bytes = stbi_load("assets/dirt.jpeg", &widthImg, &heightImg, &numColCh, 4);
-
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    if (bytes)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthImg, heightImg, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture: assets/dirt.jpeg" << std::endl;
-    }
-
-    stbi_image_free(bytes);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    GLuint tex0uni = glGetUniformLocation(shaderProgram.ID, "tex0");
-    shaderProgram.Activate();
-    glUniform1i(tex0uni, 0);
+    Texture dirt("assets/dirt.jpeg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    dirt.texUnit(shaderProgram, "tex0", 0);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -108,7 +80,8 @@ int main()
         shaderProgram.Activate();
 
         // glUniform1f(uniID, 0.5f);
-        glBindTexture(GL_TEXTURE_2D, texture);
+        // glBindTexture(GL_TEXTURE_2D, texture);
+        dirt.Bind();
 
         VAO1.Bind();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -119,7 +92,7 @@ int main()
     VAO1.Delete();
     VBO1.Delete();
     EBO1.Delete();
-    glDeleteTextures(1, &texture);
+    dirt.Delete();
     shaderProgram.Delete();
     glfwDestroyWindow(window);
     glfwTerminate();
