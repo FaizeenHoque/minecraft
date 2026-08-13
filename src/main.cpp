@@ -5,6 +5,7 @@
 #include <cmath>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include "perlin_noise.hpp"
 
 #include "texture.h"
 #include "shaders.h"
@@ -13,6 +14,7 @@
 #include "ebo.h"
 #include "stb_image.h"
 #include "camera.h"
+#include "world.h"
 
 const unsigned int width = 1600;
 const unsigned int height = 800;
@@ -83,18 +85,6 @@ GLuint indices[] =
         20, 21, 22,
         22, 23, 20};
 
-enum class BlockType
-{
-    Dirt,
-    Stone
-};
-
-struct Block
-{
-    glm::vec3 position;
-    BlockType type;
-};
-
 int main()
 {
     glfwInit();
@@ -153,11 +143,24 @@ int main()
     stone.texUnit(shaderProgram, "tex0", 0);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 
     Camera camera(framebufferWidth, framebufferHeight, glm::vec3(0.0f, 0.0f, 3.0f));
+    bool wireframe = false;
+    bool wireframeTogglePressed = false;
 
     while (!glfwWindowShouldClose(window))
     {
+        const bool togglePressed = glfwGetKey(window, GLFW_KEY_V) == GLFW_PRESS;
+        if (togglePressed && !wireframeTogglePressed)
+        {
+            wireframe = !wireframe;
+            glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
+        }
+        wireframeTogglePressed = togglePressed;
+
         glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         shaderProgram.Activate();
@@ -167,28 +170,10 @@ int main()
 
         VAO1.Bind();
 
-        std::vector<Block> blocks;
+        World world;
+        world.generate();
 
-        for (int x = 0; x < 16; x++)
-        {
-            for (int z = 0; z < 16; z++)
-            {
-                for (int y = 0; y < 10; y++)
-                {
-                    BlockType type;
-
-                    if (y < 5)
-                        type = BlockType::Stone;
-                    else
-                        type = BlockType::Dirt;
-
-                    blocks.push_back({glm::vec3(x, y, z),
-                                      type});
-                }
-            }
-        }
-
-        for (auto &block : blocks)
+        for (auto &block : world.blocks)
         {
             if (block.type == BlockType::Dirt)
             {
