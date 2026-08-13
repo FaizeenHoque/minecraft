@@ -7,6 +7,7 @@
 #include "vao.h"
 #include "vbo.h"
 #include "ebo.h"
+#include "stb_image.h"
 
 GLfloat vertices[] =
     {
@@ -22,10 +23,7 @@ GLfloat vertices[] =
         // Top-left         yellow
         -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f};
 
-GLuint indices[] =
-    {
-        0, 1, 2,
-        0, 2, 3};
+GLuint indices[] = {0, 1, 2, 0, 2, 3};
 
 int main()
 {
@@ -76,7 +74,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
         shaderProgram.Activate();
 
-        glUniform1f(uniID, 0.5f);
+        // glUniform1f(uniID, 0.5f);
 
         VAO1.Bind();
         glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
