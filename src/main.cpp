@@ -8,24 +8,24 @@
 #include "vbo.h"
 #include "ebo.h"
 
-// Vertices coordinates
 GLfloat vertices[] =
     {
-        -0.5f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f, 0.8f, 0.3f, 0.02f,  // Lower left corner
-        0.5f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f, 0.8f, 0.3f, 0.02f,   // Lower right corner
-        0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f, 1.0f, 0.6f, 0.32f,    // Upper corner
-        -0.25f, 0.5f * float(sqrt(3)) * 1 / 6, 0.0f, 0.9f, 0.45f, 0.17f, // Inner left
-        0.25f, 0.5f * float(sqrt(3)) * 1 / 6, 0.0f, 0.9f, 0.45f, 0.17f,  // Inner right
-        0.0f, -0.5f * float(sqrt(3)) * 1 / 3, 0.0f, 0.8f, 0.3f, 0.02f    // Inner down
-};
+        // Bottom-left      red
+        -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
 
-// Indices for vertices order
+        // Bottom-right     green
+        0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f,
+
+        // Top-right        blue
+        0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f,
+
+        // Top-left         yellow
+        -0.5f, 0.5f, 0.0f, 1.0f, 1.0f, 0.0f};
+
 GLuint indices[] =
     {
-        0, 3, 5, // Lower left triangle
-        3, 2, 4, // Lower right triangle
-        5, 4, 1  // Upper triangle
-};
+        0, 1, 2,
+        0, 2, 3};
 
 int main()
 {
