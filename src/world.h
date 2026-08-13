@@ -1,20 +1,9 @@
 #ifndef WORLD_CLASS_H
 #define WORLD_CLASS_H
 
+#include "block.h"
 #include "perlin_noise.hpp"
 #include <glm/glm.hpp>
-
-enum class BlockType
-{
-    Dirt,
-    Stone
-};
-
-struct Block
-{
-    glm::vec3 position;
-    BlockType type;
-};
 
 class World
 {

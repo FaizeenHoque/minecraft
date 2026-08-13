@@ -122,6 +122,7 @@ int main()
         "src/shaders/default.frag");
 
     GLuint modelLoc = glGetUniformLocation(shaderProgram.ID, "model");
+    GLuint tintLoc = glGetUniformLocation(shaderProgram.ID, "tint");
 
     VAO VAO1;
     VAO1.Bind();
@@ -137,10 +138,45 @@ int main()
     VBO1.Unbind();
     EBO1.Unbind();
 
-    Texture dirt("assets/dirt.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    dirt.texUnit(shaderProgram, "tex0", 0);
-    Texture stone("assets/stone.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
-    stone.texUnit(shaderProgram, "tex0", 0);
+    Texture GrassBlockTexture_top("assets/textures/block/grass_block_top.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    GrassBlockTexture_top.texUnit(shaderProgram, "tex0", 0);
+    Texture GrassBlockTexture_side("assets/textures/block/grass_block_side.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    GrassBlockTexture_side.texUnit(shaderProgram, "tex0", 0);
+    Texture GrassBlockTexture_bottom("assets/textures/block/dirt.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    GrassBlockTexture_bottom.texUnit(shaderProgram, "tex0", 0);
+
+    Texture DirtBlockTexture_side("assets/textures/block/dirt.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    DirtBlockTexture_side.texUnit(shaderProgram, "tex0", 0);
+    Texture StoneBlockTexture_side("assets/textures/block/stone.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    StoneBlockTexture_side.texUnit(shaderProgram, "tex0", 0);
+
+    BlockTexture GrassBlock_Textures = {
+        &GrassBlockTexture_top,
+        &GrassBlockTexture_bottom,
+        &GrassBlockTexture_side,
+        &GrassBlockTexture_side,
+        &GrassBlockTexture_side,
+        &GrassBlockTexture_side};
+    BlockTexture DirtBlock_Textures = {
+        &DirtBlockTexture_side,
+        &DirtBlockTexture_side,
+        &DirtBlockTexture_side,
+        &DirtBlockTexture_side,
+        &DirtBlockTexture_side,
+        &DirtBlockTexture_side,
+    };
+    BlockTexture StoneBlock_Textures = {
+        &StoneBlockTexture_side,
+        &StoneBlockTexture_side,
+        &StoneBlockTexture_side,
+        &StoneBlockTexture_side,
+        &StoneBlockTexture_side,
+        &StoneBlockTexture_side,
+    };
+
+    Block GrassBlock = {BlockType::Grass, GrassBlock_Textures};
+    Block DirtBlock = {BlockType::Dirt, DirtBlock_Textures};
+    Block StoneBlock = {BlockType::Stone, StoneBlock_Textures};
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_CULL_FACE);
@@ -150,6 +186,9 @@ int main()
     Camera camera(framebufferWidth, framebufferHeight, glm::vec3(0.0f, 0.0f, 3.0f));
     bool wireframe = false;
     bool wireframeTogglePressed = false;
+
+    World world;
+    world.generate();
 
     while (!glfwWindowShouldClose(window))
     {
@@ -170,34 +209,109 @@ int main()
 
         VAO1.Bind();
 
-        World world;
-        world.generate();
-
-        for (auto &block : world.blocks)
+        for (int x = 0; x < 10; x++)
         {
-            if (block.type == BlockType::Dirt)
+            for (int z = 0; z < 10; z++)
             {
-                dirt.Bind();
+                for (int y = 0; y < 60; y++)
+                {
+                    Block *currentBlock;
+
+                    if (y == 59)
+                    {
+                        currentBlock = &GrassBlock;
+                    }
+                    else if (y >= 30)
+                    {
+                        currentBlock = &DirtBlock;
+                    }
+                    else
+                    {
+                        currentBlock = &StoneBlock;
+                    }
+
+                    glm::mat4 model = glm::mat4(1.0f);
+
+                    model = glm::translate(
+                        model,
+                        glm::vec3(
+                            (float)x,
+                            (float)y,
+                            (float)z));
+
+                    glUniformMatrix4fv(
+                        modelLoc,
+                        1,
+                        GL_FALSE,
+                        glm::value_ptr(model));
+
+                    // Front
+                    currentBlock->textures.front->Bind();
+
+                    glDrawElements(
+                        GL_TRIANGLES,
+                        6,
+                        GL_UNSIGNED_INT,
+                        (void *)0);
+
+                    // Back
+                    currentBlock->textures.back->Bind();
+
+                    glDrawElements(
+                        GL_TRIANGLES,
+                        6,
+                        GL_UNSIGNED_INT,
+                        (void *)(6 * sizeof(GLuint)));
+
+                    // Right
+                    currentBlock->textures.right->Bind();
+
+                    glDrawElements(
+                        GL_TRIANGLES,
+                        6,
+                        GL_UNSIGNED_INT,
+                        (void *)(12 * sizeof(GLuint)));
+
+                    // Left
+                    currentBlock->textures.left->Bind();
+
+                    glDrawElements(
+                        GL_TRIANGLES,
+                        6,
+                        GL_UNSIGNED_INT,
+                        (void *)(18 * sizeof(GLuint)));
+
+                    // Top
+                    currentBlock->textures.top->Bind();
+
+                    if (currentBlock->type == BlockType::Grass)
+                    {
+                        glUniform3f(tintLoc, 0.7f, 1.0f, 0.6f);
+                    }
+                    else
+                    {
+                        glUniform3f(tintLoc, 1.0f, 1.0f, 1.0f);
+                    }
+
+                    glDrawElements(
+                        GL_TRIANGLES,
+                        6,
+                        GL_UNSIGNED_INT,
+                        (void *)(24 * sizeof(GLuint)));
+
+                    // IMPORTANT: reset after drawing the top
+                    glUniform3f(tintLoc, 1.0f, 1.0f, 1.0f);
+
+                    // Bottom
+                    currentBlock->textures.bottom->Bind();
+
+                    glDrawElements(
+                        GL_TRIANGLES,
+                        6,
+                        GL_UNSIGNED_INT,
+                        (void *)(30 * sizeof(GLuint)));
+                }
             }
-            else if (block.type == BlockType::Stone)
-            {
-                stone.Bind();
-            }
-
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, block.position);
-
-            glUniformMatrix4fv(
-                modelLoc,
-                1,
-                GL_FALSE,
-                glm::value_ptr(model));
-
-            glDrawElements(
-                GL_TRIANGLES,
-                sizeof(indices) / sizeof(indices[0]),
-                GL_UNSIGNED_INT,
-                0);
         }
 
         glfwSwapBuffers(window);
@@ -207,7 +321,6 @@ int main()
     VAO1.Delete();
     VBO1.Delete();
     EBO1.Delete();
-    dirt.Delete();
     shaderProgram.Delete();
     glfwDestroyWindow(window);
     glfwTerminate();
