@@ -83,6 +83,18 @@ GLuint indices[] =
         20, 21, 22,
         22, 23, 20};
 
+enum class BlockType
+{
+    Dirt,
+    Stone
+};
+
+struct Block
+{
+    glm::vec3 position;
+    BlockType type;
+};
+
 int main()
 {
     glfwInit();
@@ -135,8 +147,10 @@ int main()
     VBO1.Unbind();
     EBO1.Unbind();
 
-    Texture dirt("assets/dirt.jpeg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    Texture dirt("assets/dirt.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
     dirt.texUnit(shaderProgram, "tex0", 0);
+    Texture stone("assets/stone.png", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE);
+    stone.texUnit(shaderProgram, "tex0", 0);
 
     glEnable(GL_DEPTH_TEST);
 
@@ -151,29 +165,42 @@ int main()
         camera.Inputs(window);
         camera.Matrix(45.0f, 0.01f, 100.0f, shaderProgram, "camMatrix");
 
-        dirt.Bind();
-
         VAO1.Bind();
 
-        std::vector<glm::vec3> cubePositions;
+        std::vector<Block> blocks;
 
         for (int x = 0; x < 16; x++)
         {
             for (int z = 0; z < 16; z++)
             {
-                for (int y = 0; y < 384; y++)
+                for (int y = 0; y < 10; y++)
                 {
-                    glm::vec3 newPos = glm::vec3((float)x, (float)y, (float)z);
-                    cubePositions.push_back(newPos);
+                    BlockType type;
+
+                    if (y < 5)
+                        type = BlockType::Stone;
+                    else
+                        type = BlockType::Dirt;
+
+                    blocks.push_back({glm::vec3(x, y, z),
+                                      type});
                 }
             }
         }
 
-        for (auto &position : cubePositions)
+        for (auto &block : blocks)
         {
-            glm::mat4 model = glm::mat4(1.0f);
+            if (block.type == BlockType::Dirt)
+            {
+                dirt.Bind();
+            }
+            else if (block.type == BlockType::Stone)
+            {
+                stone.Bind();
+            }
 
-            model = glm::translate(model, position);
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, block.position);
 
             glUniformMatrix4fv(
                 modelLoc,
