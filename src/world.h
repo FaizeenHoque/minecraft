@@ -46,8 +46,8 @@ private:
     siv::PerlinNoise perlin{123456u};
 
     static constexpr int CHUNK_SIZE = 16;
-    static constexpr int WORLD_SIZE = CHUNK_SIZE * 3;
-    static constexpr int WORLD_HEIGHT = 16;
+    static constexpr int WORLD_SIZE = CHUNK_SIZE * 5;
+    static constexpr int WORLD_HEIGHT = 500;
 
     std::unordered_set<glm::ivec3, IVec3Hash, IVec3Equal> occupiedBlocks;
 };

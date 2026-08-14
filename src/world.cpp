@@ -2,8 +2,8 @@
 
 void World::generate()
 {
-    std::cout << "WORLD_SIZE: " << WORLD_SIZE << '\n';
-    std::cout << "CHUNK_SIZE: " << CHUNK_SIZE << '\n';
+    // std::cout << "WORLD_SIZE: " << WORLD_SIZE << '\n';
+    // std::cout << "CHUNK_SIZE: " << CHUNK_SIZE << '\n';
 
     for (int ChunkX = 0; ChunkX < WORLD_SIZE; ChunkX += CHUNK_SIZE)
     {
@@ -54,8 +54,11 @@ void World::generate()
         }
     }
 
-    std::cout << "Chunks: " << chunks.size() << '\n';
-    std::cout << "Blocks: " << blocks.size() << '\n';
+    // std::cout << "Chunks: " << chunks.size() << '\n';
+    // std::cout << "Blocks: " << blocks.size() << '\n';
+
+    // std::cout << "Blocks: " << blocks.size() << '\n';
+    // std::cout << "Occupied: " << occupiedBlocks.size() << '\n';
 }
 
 bool World::isAir(int x, int y, int z) const
