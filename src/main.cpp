@@ -187,7 +187,7 @@ int main()
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
-    Camera camera(framebufferWidth, framebufferHeight, glm::vec3(0.0f, 0.0f, 3.0f));
+    Camera camera(framebufferWidth, framebufferHeight, glm::vec3(10.0f, 50.0f, 10.0f));
 
     bool wireframe = false;
     bool wireframeTogglePressed = false;
@@ -195,22 +195,28 @@ int main()
     World world;
     world.generate();
 
-    for (Block &block : world.blocks)
+    for (Chunk &chunk : world.chunks)
     {
-        switch (block.type)
+        for (Block &block : chunk.blocks)
         {
-        case BlockType::Grass:
-            block.textures = GrassBlock_Textures;
-            break;
-        case BlockType::Dirt:
-            block.textures = DirtBlock_Textures;
-            break;
-        case BlockType::Stone:
-            block.textures = StoneBlock_Textures;
-            break;
-        case BlockType::Bedrock:
-            block.textures = BedrockBlock_Textures;
-            break;
+            switch (block.type)
+            {
+            case BlockType::Grass:
+                block.textures = GrassBlock_Textures;
+                break;
+
+            case BlockType::Dirt:
+                block.textures = DirtBlock_Textures;
+                break;
+
+            case BlockType::Stone:
+                block.textures = StoneBlock_Textures;
+                break;
+
+            case BlockType::Bedrock:
+                block.textures = BedrockBlock_Textures;
+                break;
+            }
         }
     }
 
@@ -232,65 +238,68 @@ int main()
         shaderProgram.Activate();
 
         camera.Inputs(window);
-        camera.Matrix(45.0f, 0.01f, 100.0f, shaderProgram, "camMatrix");
+        camera.Matrix(45.0f, 0.01f, 500.0f, shaderProgram, "camMatrix");
 
         VAO1.Bind();
 
-        for (const Block &block : world.blocks)
+        for (const Chunk &chunk : world.chunks)
         {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(block.position.x, block.position.y, block.position.z));
-
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-            // Front (+Z)
-            if (world.isAir(block.position.x, block.position.y, block.position.z + 1))
+            for (const Block &block : chunk.blocks)
             {
-                block.textures.front->Bind();
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
-            }
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(block.position.x, block.position.y, block.position.z));
 
-            // Back (-Z)
-            if (world.isAir(block.position.x, block.position.y, block.position.z - 1))
-            {
-                block.textures.back->Bind();
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(6 * sizeof(GLuint)));
-            }
+                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
-            // Right (+X)
-            if (world.isAir(block.position.x + 1, block.position.y, block.position.z))
-            {
-                block.textures.right->Bind();
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(12 * sizeof(GLuint)));
-            }
+                // Front (+Z)
+                if (world.isAir(block.position.x, block.position.y, block.position.z + 1))
+                {
+                    block.textures.front->Bind();
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)0);
+                }
 
-            // Left (-X)
-            if (world.isAir(block.position.x - 1, block.position.y, block.position.z))
-            {
-                block.textures.left->Bind();
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(18 * sizeof(GLuint)));
-            }
+                // Back (-Z)
+                if (world.isAir(block.position.x, block.position.y, block.position.z - 1))
+                {
+                    block.textures.back->Bind();
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(6 * sizeof(GLuint)));
+                }
 
-            // Top (+Y)
-            if (world.isAir(block.position.x, block.position.y + 1, block.position.z))
-            {
-                block.textures.top->Bind();
+                // Right (+X)
+                if (world.isAir(block.position.x + 1, block.position.y, block.position.z))
+                {
+                    block.textures.right->Bind();
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(12 * sizeof(GLuint)));
+                }
 
-                if (block.type == BlockType::Grass)
-                    glUniform3f(tintLoc, 0.7f, 1.0f, 0.6f);
-                else
+                // Left (-X)
+                if (world.isAir(block.position.x - 1, block.position.y, block.position.z))
+                {
+                    block.textures.left->Bind();
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(18 * sizeof(GLuint)));
+                }
+
+                // Top (+Y)
+                if (world.isAir(block.position.x, block.position.y + 1, block.position.z))
+                {
+                    block.textures.top->Bind();
+
+                    if (block.type == BlockType::Grass)
+                        glUniform3f(tintLoc, 0.7f, 1.0f, 0.6f);
+                    else
+                        glUniform3f(tintLoc, 1.0f, 1.0f, 1.0f);
+
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(24 * sizeof(GLuint)));
+
                     glUniform3f(tintLoc, 1.0f, 1.0f, 1.0f);
+                }
 
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(24 * sizeof(GLuint)));
-
-                glUniform3f(tintLoc, 1.0f, 1.0f, 1.0f);
-            }
-
-            // Bottom (-Y)
-            if (world.isAir(block.position.x, block.position.y - 1, block.position.z))
-            {
-                block.textures.bottom->Bind();
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(30 * sizeof(GLuint)));
+                // Bottom (-Y)
+                if (world.isAir(block.position.x, block.position.y - 1, block.position.z))
+                {
+                    block.textures.bottom->Bind();
+                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(30 * sizeof(GLuint)));
+                }
             }
         }
 

@@ -2,39 +2,60 @@
 
 void World::generate()
 {
-    for (int x = 0; x < WORLD_SIZE; x++)
+    std::cout << "WORLD_SIZE: " << WORLD_SIZE << '\n';
+    std::cout << "CHUNK_SIZE: " << CHUNK_SIZE << '\n';
+
+    for (int ChunkX = 0; ChunkX < WORLD_SIZE; ChunkX += CHUNK_SIZE)
     {
-        for (int z = 0; z < WORLD_SIZE; z++)
+        for (int ChunkZ = 0; ChunkZ < WORLD_SIZE; ChunkZ += CHUNK_SIZE)
         {
-            double noise = perlin.octave2D_01(
-                x * 0.05,
-                z * 0.05,
-                4);
+            Chunk chunk;
+            chunk.position = glm::ivec3(ChunkX, 0, ChunkZ);
 
-            int terrainHeight = 20 + noise * 30;
-
-            for (int y = 0; y < terrainHeight; y++)
+            for (int x = 0; x < CHUNK_SIZE; x++)
             {
-                Block block;
-                block.position = glm::ivec3(x, y, z);
+                for (int z = 0; z < CHUNK_SIZE; z++)
+                {
+                    int worldX = ChunkX + x;
+                    int worldZ = ChunkZ + z;
 
-                if (y == 0)
-                    block.type = BlockType::Bedrock;
+                    double noise = perlin.octave2D_01(
+                        worldX * 0.05,
+                        worldZ * 0.05,
+                        4);
 
-                else if (y == terrainHeight - 1)
-                    block.type = BlockType::Grass;
+                    int terrainHeight = 20 + noise * 30;
 
-                else if (y >= terrainHeight - 4)
-                    block.type = BlockType::Dirt;
+                    for (int y = 0; y < terrainHeight; y++)
+                    {
+                        Block block;
+                        block.position = glm::ivec3(worldX, y, worldZ);
 
-                else
-                    block.type = BlockType::Stone;
+                        if (y == 0)
+                            block.type = BlockType::Bedrock;
 
-                blocks.push_back(block);
-                occupiedBlocks.insert(block.position);
+                        else if (y == terrainHeight - 1)
+                            block.type = BlockType::Grass;
+
+                        else if (y >= terrainHeight - 4)
+                            block.type = BlockType::Dirt;
+
+                        else
+                            block.type = BlockType::Stone;
+
+                        blocks.push_back(block);
+                        chunk.blocks.push_back(block);
+                        occupiedBlocks.insert(block.position);
+                    }
+                }
             }
+
+            chunks.push_back(std::move(chunk));
         }
     }
+
+    std::cout << "Chunks: " << chunks.size() << '\n';
+    std::cout << "Blocks: " << blocks.size() << '\n';
 }
 
 bool World::isAir(int x, int y, int z) const

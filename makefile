@@ -4,10 +4,13 @@ LDFLAGS = -lglfw -lGL
 
 SRC = $(wildcard src/*.cpp) libraries/glad/src/glad.c
 
+.PHONY: run clean
+
 build/app: $(SRC)
 	$(CXX) $(SRC) $(CXXFLAGS) $(LDFLAGS) -o $@
 
-run: build/app
+run: clean
+	$(MAKE) build/app
 	./build/app
 
 clean:

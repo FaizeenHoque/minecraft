@@ -27,10 +27,17 @@ struct IVec3Equal
     }
 };
 
+struct Chunk
+{
+    glm::vec3 position;
+    std::vector<Block> blocks;
+};
+
 class World
 {
 public:
     std::vector<Block> blocks;
+    std::vector<Chunk> chunks;
 
     void generate();
     bool isAir(int x, int y, int z) const;
@@ -38,8 +45,9 @@ public:
 private:
     siv::PerlinNoise perlin{123456u};
 
-    static constexpr int WORLD_SIZE = 50;
-    static constexpr int WORLD_HEIGHT = 60;
+    static constexpr int CHUNK_SIZE = 16;
+    static constexpr int WORLD_SIZE = CHUNK_SIZE * 3;
+    static constexpr int WORLD_HEIGHT = 16;
 
     std::unordered_set<glm::ivec3, IVec3Hash, IVec3Equal> occupiedBlocks;
 };
