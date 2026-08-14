@@ -36,7 +36,6 @@ struct Chunk
 class World
 {
 public:
-    std::vector<Block> blocks;
     std::vector<Chunk> chunks;
 
     void generate();

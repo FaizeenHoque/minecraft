@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Ilibraries/glad/include -Ilibraries/stb
+CXXFLAGS = -O2 -Ilibraries/glad/include -Ilibraries/stb
 LDFLAGS = -lglfw -lGL
 
 SRC = $(wildcard src/*.cpp) libraries/glad/src/glad.c

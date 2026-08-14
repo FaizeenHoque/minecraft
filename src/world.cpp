@@ -2,9 +2,6 @@
 
 void World::generate()
 {
-    // std::cout << "WORLD_SIZE: " << WORLD_SIZE << '\n';
-    // std::cout << "CHUNK_SIZE: " << CHUNK_SIZE << '\n';
-
     for (int ChunkX = 0; ChunkX < WORLD_SIZE; ChunkX += CHUNK_SIZE)
     {
         for (int ChunkZ = 0; ChunkZ < WORLD_SIZE; ChunkZ += CHUNK_SIZE)
@@ -43,7 +40,6 @@ void World::generate()
                         else
                             block.type = BlockType::Stone;
 
-                        blocks.push_back(block);
                         chunk.blocks.push_back(block);
                         occupiedBlocks.insert(block.position);
                     }
@@ -53,12 +49,6 @@ void World::generate()
             chunks.push_back(std::move(chunk));
         }
     }
-
-    // std::cout << "Chunks: " << chunks.size() << '\n';
-    // std::cout << "Blocks: " << blocks.size() << '\n';
-
-    // std::cout << "Blocks: " << blocks.size() << '\n';
-    // std::cout << "Occupied: " << occupiedBlocks.size() << '\n';
 }
 
 bool World::isAir(int x, int y, int z) const
